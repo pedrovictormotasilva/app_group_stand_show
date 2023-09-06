@@ -1,5 +1,8 @@
-import 'package:email_password_login/screens/login_screen.dart';
+// ignore_for_file: prefer_const_declarations
+//https://www.youtube.com/watch?v=4FaHjSl9muo IMPLEMTAR O LOGIN 13:36
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -10,17 +13,47 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
-  final firstNameEditingController = TextEditingController();
-  final secondNameEditingController = TextEditingController();
+  final nameEditingController = TextEditingController();
   final emailEditingController = TextEditingController();
   final passwordEditingController = TextEditingController();
-  final confirmPasswordEditingController = TextEditingController();
+  final cpfEditingController = TextEditingController();
+  final roleIdEditingController = TextEditingController();
+
+  void registerUser(String name, String cpf, String email, String password) async {
+  try {
+    int roleId = 1;
+
+    final String apiUrl = "http://localhost:3333/cadastro";
+
+    final response = await post(
+      Uri.parse(apiUrl),
+      body: {
+        "name": name,
+        "email": email,
+        "password": password,
+        "cpf": cpf,
+        "roleId": roleId.toString(),
+      },
+    );
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      print(data);
+      print("Usuário cadastrado com sucesso!");
+    } else {
+      print("Erro ao cadastrar o usuário.");
+    }
+  } catch (e) {
+    print("Erro ao cadastrar o usuário: $e");
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
     final firstNameField = TextFormField(
       autofocus: false,
-      controller: firstNameEditingController,
+      controller: nameEditingController,
       keyboardType: TextInputType.name,
       //validator: () {},
       textInputAction: TextInputAction.next,
@@ -34,16 +67,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
     );
 
-    final secondNameField = TextFormField(
+    final cpfField = TextFormField(
       autofocus: false,
-      controller: secondNameEditingController,
+      controller: cpfEditingController,
       keyboardType: TextInputType.name,
       //validator: () {},
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.account_circle),
         contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-        hintText: "Segundo nome",
+        hintText: "CPF",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -82,21 +115,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
     );
 
-    final confirmPasswordField = TextFormField(
-      autofocus: false,
-      controller: confirmPasswordEditingController,
-      obscureText: true,
-      //validator: () {},
-      textInputAction: TextInputAction.done,
-      decoration: InputDecoration(
-        prefixIcon: Icon(Icons.vpn_key),
-        contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-        hintText: "Confirme sua senha",
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
+    
 
     final signUpButton = Material(
       elevation: 5,
@@ -106,10 +125,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: MediaQuery.of(context).size.width,
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-          );
+          String name = nameEditingController.text;
+          String cpf = cpfEditingController.text;
+          String email = emailEditingController.text;
+          String password = passwordEditingController.text;
+
+
+          registerUser(name, cpf, email, password,);
         },
         child: Text(
           "Cadastre-se",
@@ -131,9 +153,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
               color: const Color.fromARGB(255, 35, 77, 26)),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () {},
         ),
       ),
       body: Center(
@@ -158,16 +178,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     SizedBox(height: 45),
                     firstNameField,
                     SizedBox(height: 20),
-                    secondNameField,
+                    cpfField,
                     SizedBox(height: 20),
                     emailField,
                     SizedBox(height: 20),
                     passwordField,
                     SizedBox(height: 20),
-                    confirmPasswordField,
-                    SizedBox(height: 20),
                     signUpButton,
-                    SizedBox(height: 15),
                   ],
                 ),
               ),
@@ -177,4 +194,5 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ),
     );
   }
+  
 }

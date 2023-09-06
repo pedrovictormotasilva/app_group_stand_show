@@ -1,10 +1,9 @@
 // ignore_for_file: unused_local_variable
 
-import 'package:email_password_login/screens/home_screen.dart';
+import 'dart:math';
 import 'package:email_password_login/screens/registration_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -18,7 +17,23 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  final _auth = FirebaseAuth.instance;
+  void login(String email, String password) async {
+    try {
+      Response response =
+          await post(Uri.parse("http://localhost:3333/cadastro"), body: {
+        "email": email,
+        "password": password,
+      });
+
+      if (response.statusCode == 200) {
+        print("LOGADO COM SUCESSO");
+      } else {
+        print("ERRO AO LOGARC");
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,16 +41,6 @@ class _LoginScreenState extends State<LoginScreen> {
       autofocus: false,
       controller: emailController,
       keyboardType: TextInputType.emailAddress,
-      validator: (value) {
-        if (value!.isEmpty) {
-          return 'Por favor, digite seu email';
-        }
-
-        if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]").hasMatch(value)) {
-          return ("Por favor, digite um email válido ");
-        }
-        return null;
-      },
       onSaved: (value) {
         emailController.text = value!;
       },
@@ -54,16 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
       autofocus: false,
       controller: passwordController,
       obscureText: true,
-      validator: (value) {
-        if (value!.isEmpty) {
-          return 'A senha é necessária para o login';
-        }
-        RegExp regex = RegExp(r'^.{6,}$');
-        if (!regex.hasMatch(value)) {
-          return 'digite uma senha válida (mínimo de 6 Caracteres.)';
-        }
-        return null;
-      },
       onSaved: (value) {
         passwordController.text = value!;
       },
@@ -85,9 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: MaterialButton(
         padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: MediaQuery.of(context).size.width,
-        onPressed: () {
-          login(emailController.text, passwordController.text);
-        },
+        onPressed: () {},
         child: Text(
           "Login",
           textAlign: TextAlign.center,
@@ -159,22 +152,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-
-  void login(String email, String password) async {
-    if (_formKey.currentState!.validate()) {
-      await _auth
-          .signInWithEmailAndPassword(email: email, password: password)
-          .then((uid) => {
-                Fluttertoast.showToast(msg: "Logado com sucesso!"),
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
-                ),
-              })
-          // ignore: body_might_complete_normally_catch_error
-          .catchError((e) {
-        Fluttertoast.showToast(msg: e!.message);
-      });
-    }
   }
 }
