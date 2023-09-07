@@ -1,9 +1,11 @@
 // ignore_for_file: unused_local_variable
 
-import 'dart:math';
+import 'dart:convert';
+import 'package:email_password_login/screens/home_screen.dart';
 import 'package:email_password_login/screens/registration_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -14,24 +16,32 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final emailEditingController = TextEditingController();
+  final passwordEditingController = TextEditingController();
 
-  void login(String email, String password) async {
-    try {
-      Response response =
-          await post(Uri.parse("http://localhost:3333/cadastro"), body: {
-        "email": email,
-        "password": password,
-      });
+  Future<void> loginUser(
+      String email, String password) async {
+    final String apiUrl = "http://localhost:3333/Login";
 
-      if (response.statusCode == 200) {
-        print("LOGADO COM SUCESSO");
-      } else {
-        print("ERRO AO LOGARC");
-      }
-    } catch (e) {
-      print(e.toString());
+    final user = {
+      "email": email,
+      "password": password,
+    };
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(user),
+    );
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body.toString());
+      print(data["token"]);
+      print("Usuário logado com sucesso!");
+    } else {
+      print("Erro ao logar o usuário.");
     }
   }
 
@@ -39,10 +49,17 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final emailField = TextFormField(
       autofocus: false,
-      controller: emailController,
+      controller: emailEditingController,
       keyboardType: TextInputType.emailAddress,
-      onSaved: (value) {
-        emailController.text = value!;
+      validator: (email) {
+        if (email == null || email.isEmpty) {
+          return "Por favor, insira um e-mail ";
+        } else if (!RegExp(
+                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+            .hasMatch(emailEditingController.text)) {
+          return 'Por favor, digite um e-mail válido';
+        }
+        return null;
       },
       textInputAction: TextInputAction.next,
       decoration: InputDecoration(
@@ -57,16 +74,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final passwordField = TextFormField(
       autofocus: false,
-      controller: passwordController,
+      controller: passwordEditingController,
       obscureText: true,
-      onSaved: (value) {
-        passwordController.text = value!;
+      validator: (password) {
+        if (password == null || password.isEmpty) {
+          return "Por favor, digite uma senha";
+        } else if (password.length < 6) {
+          return "A senha deve conter no mínimo 6 caracteres";
+        }
+        return null;
       },
-      textInputAction: TextInputAction.done,
+      textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.vpn_key),
         contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-        hintText: "Password",
+        hintText: "Senha",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -76,13 +98,41 @@ class _LoginScreenState extends State<LoginScreen> {
     final loginButton = Material(
       elevation: 5,
       borderRadius: BorderRadius.circular(30),
-      color: Color.fromARGB(255, 35, 77, 26),
+      color: const Color.fromARGB(255, 35, 77, 26),
       child: MaterialButton(
         padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
         minWidth: MediaQuery.of(context).size.width,
-        onPressed: () {},
+        onPressed: () async {
+          String email = emailEditingController.text;
+          String password = passwordEditingController.text;
+          loginUser(
+            email,
+            password,
+          );
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (_formKey.currentState!.validate()) {
+            bool deuCerto = await logar();
+            if (!currentFocus.hasPrimaryFocus) {
+              currentFocus.unfocus();
+            }
+
+            if (deuCerto = true) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(),
+                ),
+              );
+            } else {
+              passwordEditingController.clear();
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
+          }
+
+          return null;
+        },
         child: Text(
-          "Login",
+          "Logar",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 20,
@@ -153,4 +203,31 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  Future<bool> logar() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    var url = Uri.parse('http://localhost:3333/Login');
+    var response = await http.post(
+      url,
+      body: {
+        'email': emailEditingController.text,
+        'password': passwordEditingController.text,
+        
+      },
+    );
+    if (response.statusCode == 200) {
+      print(jsonDecode(response.body)['token']);
+      return true;
+    } else {
+      print(jsonDecode(response.body));
+      return false;
+    }
+  }
+
+  final snackBar = SnackBar(
+    content: Text(
+      "Email ou senha são inválidos",
+      textAlign: TextAlign.center,
+    ),
+    backgroundColor: Colors.redAccent,
+  );
 }
