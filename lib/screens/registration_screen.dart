@@ -206,7 +206,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         leading: IconButton(
             icon: Icon(Icons.arrow_back,
                 color: const Color.fromARGB(255, 35, 77, 26)),
-            onPressed: () {}),
+            onPressed: () {
+              Navigator.of(context).pop();
+            }),
       ),
       body: Center(
         child: SingleChildScrollView(
