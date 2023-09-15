@@ -18,9 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailEditingController = TextEditingController();
   final passwordEditingController = TextEditingController();
-
-  Future<void> loginUser(
-      String email, String password) async {
+  Future<bool> loginUser(String email, String password) async {
     final String apiUrl = "http://localhost:3333/Login";
 
     final user = {
@@ -38,12 +36,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body.toString());
-      print(data["token"]);
+      print(data);
       print("Usuário logado com sucesso!");
+      return true; // Login bem-sucedido
     } else {
       print("Erro ao logar o usuário.");
+      return false; // Erro no login
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -105,31 +107,20 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () async {
           String email = emailEditingController.text;
           String password = passwordEditingController.text;
-          loginUser(
-            email,
-            password,
-          );
-          FocusScopeNode currentFocus = FocusScope.of(context);
-          if (_formKey.currentState!.validate()) {
-            bool deuCerto = await logar();
-            if (!currentFocus.hasPrimaryFocus) {
-              currentFocus.unfocus();
-            }
+          
+          bool loginSuccess = await loginUser(email, password);
 
-            if (deuCerto = true) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(),
-                ),
-              );
-            } else {
-              passwordEditingController.clear();
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }
+          if (loginSuccess) {
+            // Redireciona para a tela de home após um login bem-sucedido
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(),
+              ),
+            );
+          } else {
+            // Trate o erro de login, talvez exibindo uma mensagem de erro
+            ScaffoldMessenger.of(context).showSnackBar(snackLoginError);
           }
-
-          return null;
         },
         child: Text(
           "Logar",
@@ -202,28 +193,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+    
   }
-  Future<bool> logar() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var url = Uri.parse('http://localhost:3333/Login');
-    var response = await http.post(
-      url,
-      body: {
-        'email': emailEditingController.text,
-        'password': passwordEditingController.text,
-        
-      },
-    );
-    if (response.statusCode == 200) {
-      print(jsonDecode(response.body)['token']);
-      return true;
-    } else {
-      print(jsonDecode(response.body));
-      return false;
-    }
-  }
-
-  final snackBar = SnackBar(
+  final snackLoginError = SnackBar(
     content: Text(
       "Email ou senha são inválidos",
       textAlign: TextAlign.center,
@@ -231,3 +203,6 @@ class _LoginScreenState extends State<LoginScreen> {
     backgroundColor: Colors.redAccent,
   );
 }
+  
+
+  

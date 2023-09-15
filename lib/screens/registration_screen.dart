@@ -19,7 +19,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final passwordEditingController = TextEditingController();
   final cpfEditingController = TextEditingController();
 
-  Future<void> registerUser(
+  Future<bool> registerUser(
       String name, String cpf, String email, String password) async {
     final String apiUrl = "http://localhost:3333/cadastro";
 
@@ -42,9 +42,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       var data = jsonDecode(response.body.toString());
       print(data);
       print("Usuário cadastrado com sucesso!");
+      return true; // Registro bem-sucedido
     } else {
       print("Erro ao cadastrar o usuário.");
+      return false;
     }
+  
   }
 
   @override
@@ -67,7 +70,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.account_circle),
         contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-        hintText: "Primeiro nome",
+        hintText: "Nome Completo",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -158,33 +161,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           String cpf = cpfEditingController.text;
           String email = emailEditingController.text;
           String password = passwordEditingController.text;
-          registerUser(
+
+          bool registrationSuccess = await registerUser(
             name,
             cpf,
             email,
             password,
           );
-          FocusScopeNode currentFocus = FocusScope.of(context);
-          if (_formKey.currentState!.validate()) {
-            bool deuCerto = await registrar();
-            if (!currentFocus.hasPrimaryFocus) {
-              currentFocus.unfocus();
-            }
-
-            if (deuCerto = true) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LoginScreen(),
-                ),
-              );
-            } else {
-              passwordEditingController.clear();
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-            }
+          if (registrationSuccess) {
+            // Redireciona para a tela de login após um registro bem-sucedido
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => LoginScreen(),
+              ),
+            );
+          } else {
+            // Trate o erro de registro, talvez exibindo uma mensagem de erro
+            ScaffoldMessenger.of(context)
+                .showSnackBar(snackBarRegistrationError);
           }
-
-          return null;
         },
         child: Text(
           "Cadastre-se",
@@ -249,30 +244,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Future<bool> registrar() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    var url = Uri.parse('http://localhost:3333/cadastro');
-    var response = await http.post(
-      url,
-      body: {
-        'username': emailEditingController.text,
-        'password': passwordEditingController.text,
-        'name': nameEditingController.text,
-        'cpf': cpfEditingController.text,
-      },
-    );
-    if (response.statusCode == 200) {
-      print(jsonDecode(response.body));
-      return true;
-    } else {
-      print(jsonDecode(response.body));
-      return false;
-    }
-  }
-
-  final snackBar = SnackBar(
+  final snackBarRegistrationError = SnackBar(
     content: Text(
-      "Email ou senha são inválidos",
+      "Revise se os campos são inválidos",
       textAlign: TextAlign.center,
     ),
     backgroundColor: Colors.redAccent,
