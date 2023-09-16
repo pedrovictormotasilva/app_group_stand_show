@@ -33,7 +33,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json', 
+        
       },
       body: jsonEncode(user),
     );
@@ -42,12 +43,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       var data = jsonDecode(response.body.toString());
       print(data);
       print("Usuário cadastrado com sucesso!");
-      return true; // Registro bem-sucedido
+      return true; 
     } else {
       print("Erro ao cadastrar o usuário.");
       return false;
     }
-  
   }
 
   @override
@@ -62,7 +62,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         }
         ;
         if (name.length < 3) {
-          return "Nome de usuario muito curto";
+          print("Nome de usuario muito curto");
         }
         return null;
       },
@@ -169,14 +169,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             password,
           );
           if (registrationSuccess) {
-            // Redireciona para a tela de login após um registro bem-sucedido
+            
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => LoginScreen(),
               ),
             );
           } else {
-            // Trate o erro de registro, talvez exibindo uma mensagem de erro
             ScaffoldMessenger.of(context)
                 .showSnackBar(snackBarRegistrationError);
           }
@@ -211,6 +210,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(36.0),
+
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -246,7 +246,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   final snackBarRegistrationError = SnackBar(
     content: Text(
-      "Revise se os campos são inválidos",
+      "Revise se os campos são válidos",
       textAlign: TextAlign.center,
     ),
     backgroundColor: Colors.redAccent,

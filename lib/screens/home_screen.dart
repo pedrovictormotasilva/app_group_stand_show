@@ -1,3 +1,4 @@
+import 'package:email_password_login/screens/dashboard_screen.dart';
 import 'package:email_password_login/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -22,34 +23,50 @@ class HomeScreen extends StatelessWidget {
                 height: 150,
                 child: Image.asset("assets/logo.png", fit: BoxFit.contain),
               ),
-              Text(
+              const Text(
                 "Bem vindo de volta! ",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
-              Text("Nome",
+              const Text("Nome",
                   style: TextStyle(
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,
                   )),
-              Text("user@example.com",
+              const Text("user@example.com",
                   style: TextStyle(
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,
                   )),
-              SizedBox(
+              const SizedBox(
                 height: 15,
               ),
-              ActionChip(
-                  label: Text("Logout"),
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    );
-                  }),
+              Column(
+                children: [
+                  ActionChip(
+                    label: Text("Painel Administrativo"),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const DashboardScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  ActionChip(
+                    label: Text("Logout"),
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
+                  ),
+                ],
+              )
             ],
           ),
         ),

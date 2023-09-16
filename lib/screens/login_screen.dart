@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailEditingController = TextEditingController();
   final passwordEditingController = TextEditingController();
+
   Future<bool> loginUser(String email, String password) async {
     final String apiUrl = "http://localhost:3333/Login";
 
@@ -44,8 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
       return false; // Erro no login
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -107,18 +106,16 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () async {
           String email = emailEditingController.text;
           String password = passwordEditingController.text;
-          
+
           bool loginSuccess = await loginUser(email, password);
 
           if (loginSuccess) {
-            // Redireciona para a tela de home após um login bem-sucedido
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => HomeScreen(),
               ),
             );
           } else {
-            // Trate o erro de login, talvez exibindo uma mensagem de erro
             ScaffoldMessenger.of(context).showSnackBar(snackLoginError);
           }
         },
@@ -193,16 +190,13 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-    
   }
+
   final snackLoginError = SnackBar(
     content: Text(
-      "Email ou senha são inválidos",
+      "Email ou senha incorretos",
       textAlign: TextAlign.center,
     ),
     backgroundColor: Colors.redAccent,
   );
 }
-  
-
-  
