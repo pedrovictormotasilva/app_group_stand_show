@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<bool> loginUser(String email, String password) async {
     final String apiUrl = "http://localhost:3333/Login";
-
+  
     final user = {
       "email": email,
       "password": password,
@@ -39,10 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
       var data = jsonDecode(response.body.toString());
       print(data);
       print("Usuário logado com sucesso!");
-      return true; // Login bem-sucedido
+      return true;
     } else {
       print("Erro ao logar o usuário.");
-      return false; // Erro no login
+      return false; 
     }
   }
 
