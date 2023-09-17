@@ -1,6 +1,7 @@
 import 'package:email_password_login/screens/dashboard_screen.dart';
 import 'package:email_password_login/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:email_password_login/apiDart/api_functions.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -47,12 +48,16 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   ActionChip(
                     label: Text("Painel Administrativo"),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const DashboardScreen()),
-                      );
+                    onPressed: () async {
+                      final authToken = await fetchAuthToken();
+                      if (authToken !=null) {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DashboardScreen(authToken: authToken),
+                          ),
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 16),
@@ -66,7 +71,7 @@ class HomeScreen extends StatelessWidget {
                     },
                   ),
                 ],
-              )
+              ),
             ],
           ),
         ),

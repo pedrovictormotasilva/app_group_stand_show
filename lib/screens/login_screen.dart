@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable
-
 import 'dart:convert';
 import 'package:email_password_login/screens/home_screen.dart';
 import 'package:email_password_login/screens/registration_screen.dart';
@@ -19,9 +17,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailEditingController = TextEditingController();
   final passwordEditingController = TextEditingController();
 
-  Future<bool> loginUser(String email, String password) async {
+  Future<String?> loginUser(String email, String password) async {
     final String apiUrl = "http://localhost:3333/Login";
-  
+
     final user = {
       "email": email,
       "password": password,
@@ -36,13 +34,13 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body.toString());
-      print(data);
+      final data = jsonDecode(response.body);
+      final accessToken = data['acessToken'] as String;
       print("Usuário logado com sucesso!");
-      return true;
+      return accessToken;
     } else {
       print("Erro ao logar o usuário.");
-      return false; 
+      return null;
     }
   }
 
@@ -106,10 +104,12 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () async {
           String email = emailEditingController.text;
           String password = passwordEditingController.text;
+          String? accessToken = await loginUser(email, password);
 
-          bool loginSuccess = await loginUser(email, password);
+          if (accessToken != null) {
+            final prefs = await SharedPreferences.getInstance();
+            prefs.setString('accessToken', accessToken);
 
-          if (loginSuccess) {
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => HomeScreen(),

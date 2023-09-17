@@ -1,11 +1,12 @@
+import 'dart:convert';
+import 'package:email_password_login/apiDart/api_functions.dart';
 import 'package:email_password_login/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({Key? key, required String authToken})
+      : super(key: key);
 
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
@@ -13,30 +14,23 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   List<User> users = [];
-  late String authToken;
+  String? authToken;
 
   @override
   void initState() {
     super.initState();
-
     fetchAuthToken().then((token) {
       if (token != null) {
         setState(() {
           authToken = token;
         });
 
-        fetchUsers();
+        _fetchUsers(authToken!);
       }
     });
   }
 
-  Future<String?> fetchAuthToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('authToken');
-    return token;
-  }
-
-  Future<void> fetchUsers() async {
+  Future<void> _fetchUsers(String authToken) async {
     try {
       final response = await http.get(
         Uri.parse('http://localhost:3333/Usuarios'),
@@ -58,28 +52,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Future<void> updateUserRole(User user, String roleId) async {
+  Future<void> _updateUserRole(User user, int newRoleId) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:3333/Usuarios'),
+        Uri.parse('http://localhost:3333/attUsers'),
         headers: <String, String>{
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'roleId': roleId,
+          'roleId': newRoleId.toString(),
         }),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          user.roleId = roleId;
+          user.roleId = newRoleId;
         });
       } else {
         throw Exception('Falha na atualização da API');
       }
     } catch (error) {
-      
       print('Erro: $error');
     }
   }
@@ -100,61 +93,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: DataTable(
-            columns: const [
-              DataColumn(label: Text('ID')),
-              DataColumn(label: Text('Email')),
-              DataColumn(label: Text('Role ID')),
-              DataColumn(label: Text('Ativo')),
-            ],
-            rows: users
-                .map(
-                  (user) => DataRow(
-                    cells: [
-                      DataCell(Text(user.id)),
-                      DataCell(Text(user.email)),
-                      DataCell(Text(user.roleId)),
-                      DataCell(Text(user.isActive ? 'Sim' : 'Não')),
-                      DataCell(
-                        ElevatedButton(
-                          onPressed: () {
-                            updateUserRole(user, 'NovoRoleIdAqui');
-                          },
-                          child: Text('Editar'),
-                        ),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: const [
+            DataColumn(label: Text('ID')),
+            DataColumn(label: Text('Email')),
+            DataColumn(label: Text('Role ID')),
+            DataColumn(label: Text('Ativo')),
+          ],
+          rows: users
+              .map(
+                (user) => DataRow(
+                  cells: [
+                    DataCell(Text(user.id.toString())),
+                    DataCell(Text(user.email)),
+                    DataCell(
+                      DropdownButton<int>(
+                        value: int.tryParse(user.roleId?.toString() ?? '1') ?? 1,
+                        onChanged: (int? newRoleId) {
+                          if (newRoleId != null) {
+                            _updateUserRole(user, newRoleId);
+                          }
+                        },
+                        items: [
+                          DropdownMenuItem<int>(
+                            value: 1,
+                            child: Text('Cliente'),
+                          ),
+                          DropdownMenuItem<int>(
+                            value: 2,
+                            child: Text('Comerciante'),
+                          ),
+                          DropdownMenuItem<int>(
+                            value: 3,
+                            child: Text('Projetista'),
+                          ),
+                          DropdownMenuItem<int>(
+                            value: 4,
+                            child: Text('Admin'),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )
-                .toList(),
-          ),
+                    ),
+                    DataCell(
+                      Text(user.isActive != null
+                          ? (user.isActive ? 'Sim' : 'Não')
+                          : ''),
+                    ),
+                  ],
+                ),
+              )
+              .toList(),
         ),
       ),
-    );
-  }
-}
-
-class User {
-  final String id;
-  final String email;
-  String roleId;
-  final bool isActive;
-
-  User({
-    required this.id,
-    required this.email,
-    required this.roleId,
-    required this.isActive,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      email: json['email'],
-      roleId: json['roleId'],
-      isActive: json['isActive'],
     );
   }
 }
