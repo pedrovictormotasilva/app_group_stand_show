@@ -19,8 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<User> getUserInfo(String accessToken) async {
     try {
       final response = await http.get(
-        Uri.parse(
-            'http://localhost:3333/Usuarios'), // Substitua pela URL correta da API.
+        Uri.parse('http://localhost:3333/Usuarios'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },
@@ -29,8 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> userDataList = json.decode(response.body);
         if (userDataList.isNotEmpty) {
-          final Map<String, dynamic> userData =
-              userDataList[0]; // Acesse o primeiro usuário na lista.
+          final Map<String, dynamic> userData = userDataList[1];
           return User.fromJson(userData);
         } else {
           throw Exception('Nenhum usuário encontrado na resposta da API');
@@ -70,12 +68,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> handleLogout() async {
-    // Implemente a lógica de logout aqui, se necessário
-    // Por exemplo, remova o token JWT e redirecione para a tela de login
-    // Aqui você pode usar a função removeAuthToken() se tiver sido definida
-    // para remover o token JWT do SharedPreferences.
-    // Exemplo:
-    // await removeAuthToken();
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -91,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           if (userName != null)
             IconButton(
-              icon: Icon(Icons.person), // Ícone de usuário
+              icon: Icon(Icons.person),
               onPressed: () {
                 showDialog(
                   context: context,
