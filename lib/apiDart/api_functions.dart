@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class User {
   final int id;
   String name; // Atualizado para permitir a edição do nome.
-  final String email;
+   String email;
   final String password;
   final String cpf;
   int? roleId;
@@ -43,9 +43,6 @@ Future<void> updateUserRole(User user, String roleId, String? authToken) async {
       },
       body: jsonEncode(<String, dynamic>{
         'roleId': roleId,
-        'name': user.name, // Inclua o nome no corpo da solicitação.
-        'email': user.email, 
-        'roleId': user.roleId,
       }),
     );
 
@@ -69,8 +66,7 @@ Future<void> updateUserName(User user, String newName, String? authToken) async 
       },
       body: jsonEncode(<String, dynamic>{
         'name': newName, // Envie o novo nome para a API.
-        'email': user.email, 
-        'roleId': user.roleId,
+        'email': user.email,
       }),
     );
 

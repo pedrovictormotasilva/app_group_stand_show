@@ -16,6 +16,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String? authToken;
   String? userName;
   String? userEmail;
+  int? userRoleId; // Adicionado para rastrear o roleId do usuário
+
   Future<User> getUserInfo(String accessToken) async {
     try {
       final response = await http.get(
@@ -28,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.statusCode == 200) {
         final List<dynamic> userDataList = json.decode(response.body);
         if (userDataList.isNotEmpty) {
-          final Map<String, dynamic> userData = userDataList[1];
+          final Map<String, dynamic> userData = userDataList[0];
           return User.fromJson(userData);
         } else {
           throw Exception('Nenhum usuário encontrado na resposta da API');
@@ -61,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         userName = user.name;
         userEmail = user.email;
+        userRoleId = user.roleId; // Definir o roleId do usuário
       });
     } catch (error) {
       print('Erro ao buscar informações do usuário: $error');
@@ -78,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Bem vindo"),
+        title: const Text("Bem-vindo"),
         centerTitle: true,
         actions: [
           if (userName != null)
@@ -125,34 +128,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Image.asset("assets/logo.png", fit: BoxFit.contain),
               ),
               const Text(
-                "Bem vindo de volta!",
+                "Bem-vindo de volta!",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 10,
               ),
-              const SizedBox(
-                height: 15,
-              ),
-              Column(
-                children: [
-                  ActionChip(
-                    label: Text("Painel Administrativo"),
-                    onPressed: () async {
-                      final authToken = await fetchAuthToken();
-                      if (authToken != null) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                DashboardScreen(authToken: authToken),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
+              userRoleId == 4
+                  ? ActionChip(
+                      label: Text("Painel Administrativo"),
+                      onPressed: () async {
+                        final authToken = await fetchAuthToken();
+                        if (authToken != null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  DashboardScreen(authToken: authToken),
+                            ),
+                          );
+                        }
+                      },
+                    )
+                  : Container(), // Container vazio quando não deve ser exibido
             ],
           ),
         ),
