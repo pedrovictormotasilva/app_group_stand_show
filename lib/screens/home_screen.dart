@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? authToken;
   String? userName;
   String? userEmail;
-  int? userRoleId; // Adicionado para rastrear o roleId do usuário
+  int? userRoleId; 
 
   Future<User> getUserInfo(String accessToken) async {
     try {
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         userName = user.name;
         userEmail = user.email;
-        userRoleId = user.roleId; // Definir o roleId do usuário
+        userRoleId = user.roleId; 
       });
     } catch (error) {
       print('Erro ao buscar informações do usuário: $error');
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
                       },
                     )
-                  : Container(), // Container vazio quando não deve ser exibido
+                  : Container(), 
             ],
           ),
         ),

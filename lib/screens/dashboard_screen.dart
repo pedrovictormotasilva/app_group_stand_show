@@ -103,7 +103,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       builder: (BuildContext context) {
         return EditUserDialog(
           user: user,
-          updateUser: _updateUser, // Passa a função aqui
+          updateUser: _updateUser,
         );
       },
     );
@@ -157,7 +157,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ),
-          // Usando ListView com rolagem vertical
+          
           Expanded(
             child: ListView.builder(
               itemCount: filteredUsers.length,
@@ -199,8 +199,7 @@ class EditUserDialog extends StatefulWidget {
 class _EditUserDialogState extends State<EditUserDialog> {
   String newName = '';
   String newEmail = '';
-  int newRoleId = 1; // Inicialize com o valor atual de roleId
-
+  int newRoleId = 1; 
   @override
   void initState() {
     super.initState();

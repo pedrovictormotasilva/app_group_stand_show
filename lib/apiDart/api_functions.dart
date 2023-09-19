@@ -4,8 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
   final int id;
-  String name; // Atualizado para permitir a edição do nome.
-   String email;
+  String name; 
+  String email;
   final String password;
   final String cpf;
   int? roleId;
@@ -56,7 +56,8 @@ Future<void> updateUserRole(User user, String roleId, String? authToken) async {
   }
 }
 
-Future<void> updateUserName(User user, String newName, String? authToken) async {
+Future<void> updateUserName(
+    User user, String newName, String? authToken) async {
   try {
     final response = await http.put(
       Uri.parse('http://localhost:3333/attUsers'),
@@ -65,7 +66,7 @@ Future<void> updateUserName(User user, String newName, String? authToken) async 
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, dynamic>{
-        'name': newName, // Envie o novo nome para a API.
+        'name': newName, 
         'email': user.email,
       }),
     );
