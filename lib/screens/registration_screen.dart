@@ -1,9 +1,7 @@
-// ignore_for_file: prefer_const_declarations, unused_local_variable, dead_code, library_private_types_in_public_api
 import 'dart:convert';
 import 'package:email_password_login/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -18,10 +16,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final emailEditingController = TextEditingController();
   final passwordEditingController = TextEditingController();
   final cpfEditingController = TextEditingController();
+  String? nameErrorText;
+  String? emailErrorText;
+  String? passwordErrorText;
+  String? cpfErrorText;
 
   Future<bool> registerUser(
       String name, String cpf, String email, String password) async {
-    final String apiUrl = "http://localhost:3333/cadastro";
+    final String apiUrl = "http://10.0.0.10:3333/cadastro";
 
     final user = {
       "name": name,
@@ -33,8 +35,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final response = await http.post(
       Uri.parse(apiUrl),
       headers: {
-        'Content-Type': 'application/json', 
-        
+        'Content-Type': 'application/json',
       },
       body: jsonEncode(user),
     );
@@ -43,7 +44,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       var data = jsonDecode(response.body.toString());
       print(data);
       print("Usuário cadastrado com sucesso!");
-      return true; 
+      return true;
     } else {
       print("Erro ao cadastrar o usuário.");
       return false;
@@ -59,10 +60,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       validator: (name) {
         if (name == null || name.isEmpty) {
           return "Insira seu nome";
-        }
-        ;
-        if (name.length < 3) {
-          print("Nome de usuario muito curto");
+        } else if (name.length < 3) {
+          return "Nome de usuário muito curto";
         }
         return null;
       },
@@ -74,6 +73,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        errorText: nameErrorText,
       ),
     );
 
@@ -84,9 +84,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       validator: (cpf) {
         if (cpf == null || cpf.isEmpty) {
           return "Insira seu CPF";
-        }
-        if (cpf.length < 11 || cpf.length > 11) {
-          return "CPF'S válidos tem 11 caracteres";
+        } else if (cpf.length < 11) {
+          return "CPF válido deve ter 11 caracteres";
+        } else if (cpf.length > 11) {
+          return "CPF válido não pode ter mais de 11 caracteres";
         }
         return null;
       },
@@ -94,10 +95,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.account_circle),
         contentPadding: EdgeInsets.fromLTRB(20, 15, 20, 15),
-        hintText: "CPF ",
+        hintText: "CPF",
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        errorText: cpfErrorText,
       ),
     );
 
@@ -109,7 +111,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         if (email == null || email.isEmpty) {
           return "Por favor, insira um e-mail ";
         } else if (!RegExp(
-                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                r"^[a-zA-Z0-9.a-zA-Z0.9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
             .hasMatch(emailEditingController.text)) {
           return 'Por favor, digite um e-mail válido';
         }
@@ -123,6 +125,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        errorText: emailErrorText,
       ),
     );
 
@@ -146,6 +149,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        errorText: passwordErrorText,
       ),
     );
 
@@ -162,22 +166,30 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           String email = emailEditingController.text;
           String password = passwordEditingController.text;
 
-          bool registrationSuccess = await registerUser(
-            name,
-            cpf,
-            email,
-            password,
-          );
-          if (registrationSuccess) {
-            
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => LoginScreen(),
-              ),
+          if (_formKey.currentState!.validate()) {
+            setState(() {
+              nameErrorText = null;
+              cpfErrorText = null;
+              emailErrorText = null;
+              passwordErrorText = null;
+            });
+
+            bool registrationSuccess = await registerUser(
+              name,
+              cpf,
+              email,
+              password,
             );
-          } else {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(snackBarRegistrationError);
+            if (registrationSuccess) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => LoginScreen(),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(snackBarRegistrationError);
+            }
           }
         },
         child: Text(
@@ -210,7 +222,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(36.0),
-
               child: Form(
                 key: _formKey,
                 child: Column(

@@ -34,7 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _fetchUsers(String authToken) async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3333/Usuarios'),
+        Uri.parse('http://10.0.0.10:3333/Usuarios'),
         headers: <String, String>{
           'Authorization': 'Bearer $authToken',
         },
@@ -62,7 +62,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   ) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:3333/attUsers/${user.id}'),
+        Uri.parse('http://10.0.0.10:3333/attUsers/${user.id}'),
         headers: <String, String>{
           'Authorization': 'Bearer $authToken',
           'Content-Type': 'application/json; charset=UTF-8',
@@ -92,7 +92,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     setState(() {
       filteredUsers = users
           .where((user) =>
-              user.name != null && user.name.toLowerCase().contains(query))
+              user.name.toLowerCase().contains(query))
           .toList();
     });
   }
@@ -157,14 +157,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
           ),
-          
           Expanded(
             child: ListView.builder(
               itemCount: filteredUsers.length,
               itemBuilder: (context, index) {
                 final user = filteredUsers[index];
                 return ListTile(
-                  title: Text(user.name ?? ''),
+                  title: Text(user.name),
                   subtitle: Text(_getRoleName(user.roleId!)),
                   trailing: ElevatedButton(
                     onPressed: () {
@@ -199,12 +198,12 @@ class EditUserDialog extends StatefulWidget {
 class _EditUserDialogState extends State<EditUserDialog> {
   String newName = '';
   String newEmail = '';
-  int newRoleId = 1; 
+  int newRoleId = 1;
   @override
   void initState() {
     super.initState();
-    newName = widget.user.name ?? '';
-    newEmail = widget.user.email ?? '';
+    newName = widget.user.name;
+    newEmail = widget.user.email;
     newRoleId = widget.user.roleId!;
   }
 

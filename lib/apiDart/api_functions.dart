@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class User {
   final int id;
-  String name; 
+  String name;
   String email;
   final String password;
   final String cpf;
@@ -66,7 +66,7 @@ Future<void> updateUserName(
         'Content-Type': 'application/json; charset=UTF-8',
       },
       body: jsonEncode(<String, dynamic>{
-        'name': newName, 
+        'name': newName,
         'email': user.email,
       }),
     );

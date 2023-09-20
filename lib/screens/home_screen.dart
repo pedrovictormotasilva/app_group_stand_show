@@ -16,12 +16,12 @@ class _HomeScreenState extends State<HomeScreen> {
   String? authToken;
   String? userName;
   String? userEmail;
-  int? userRoleId; 
+  int? userRoleId; // Adicione a variável para o papel do usuário
 
   Future<User> getUserInfo(String accessToken) async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3333/Usuarios'),
+        Uri.parse('http://10.0.0.10:3333/Usuarios'),
         headers: <String, String>{
           'Authorization': 'Bearer $accessToken',
         },
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         userName = user.name;
         userEmail = user.email;
-        userRoleId = user.roleId; 
+        userRoleId = user.roleId; // Defina userRoleId aqui
       });
     } catch (error) {
       print('Erro ao buscar informações do usuário: $error');
@@ -84,10 +84,14 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("Bem-vindo"),
         centerTitle: true,
         actions: [
-          if (userName != null)
-            IconButton(
-              icon: Icon(Icons.person),
-              onPressed: () {
+          IconButton(
+            icon: Icon(Icons.person),
+            onPressed: () async {
+              try {
+                final user = await getUserInfo(authToken!);
+                final userName = user.name;
+                final userEmail = user.email;
+
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -112,8 +116,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 );
-              },
-            ),
+              } catch (error) {
+                print('Erro ao buscar informações do usuário: $error');
+              }
+            },
+          ),
         ],
       ),
       body: Center(
@@ -131,26 +138,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 "Bem-vindo de volta!",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(
-                height: 10,
-              ),
-              userRoleId == 4
-                  ? ActionChip(
-                      label: Text("Painel Administrativo"),
-                      onPressed: () async {
-                        final authToken = await fetchAuthToken();
-                        if (authToken != null) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  DashboardScreen(authToken: authToken),
-                            ),
-                          );
-                        }
-                      },
-                    )
-                  : Container(), 
+              if (userRoleId != 4) ...[
+                const SizedBox(
+                  height: 10,
+                ),
+                ActionChip(
+                  label: Text("Painel Administrativo"),
+                  onPressed: () async {
+                    final authToken = await fetchAuthToken();
+                    if (authToken != null) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              DashboardScreen(authToken: authToken),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
             ],
           ),
         ),

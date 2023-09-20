@@ -16,9 +16,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final emailEditingController = TextEditingController();
   final passwordEditingController = TextEditingController();
+  String? emailErrorText;
+  String? passwordErrorText;
 
   Future<String?> loginUser(String email, String password) async {
-    final String apiUrl = "http://localhost:3333/Login";
+    final String apiUrl = "http://10.0.0.10:3333/Login";
 
     final user = {
       "email": email,
@@ -54,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (email == null || email.isEmpty) {
           return "Por favor, insira um e-mail ";
         } else if (!RegExp(
-                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                r"^[a-zA-Z0-9.a-zA-Z0.9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
             .hasMatch(emailEditingController.text)) {
           return 'Por favor, digite um e-mail válido';
         }
@@ -68,6 +70,7 @@ class _LoginScreenState extends State<LoginScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        errorText: emailErrorText, // Exibe a mensagem de erro
       ),
     );
 
@@ -91,6 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
+        errorText: passwordErrorText, // Exibe a mensagem de erro
       ),
     );
 
@@ -104,19 +108,28 @@ class _LoginScreenState extends State<LoginScreen> {
         onPressed: () async {
           String email = emailEditingController.text;
           String password = passwordEditingController.text;
-          String? accessToken = await loginUser(email, password);
 
-          if (accessToken != null) {
-            final prefs = await SharedPreferences.getInstance();
-            prefs.setString('accessToken', accessToken);
+          if (_formKey.currentState!.validate()) {
+            // Limpa as mensagens de erro se a validação passar
+            setState(() {
+              emailErrorText = null;
+              passwordErrorText = null;
+            });
 
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(),
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(snackLoginError);
+            String? accessToken = await loginUser(email, password);
+
+            if (accessToken != null) {
+              final prefs = await SharedPreferences.getInstance();
+              prefs.setString('accessToken', accessToken);
+
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(snackLoginError);
+            }
           }
         },
         child: Text(
