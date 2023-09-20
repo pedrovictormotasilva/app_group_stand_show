@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final user = {
       "email": email,
       "password": password,
+      
     };
 
     final response = await http.post(
@@ -70,7 +71,7 @@ class _LoginScreenState extends State<LoginScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        errorText: emailErrorText, // Exibe a mensagem de erro
+        errorText: emailErrorText, 
       ),
     );
 
@@ -94,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        errorText: passwordErrorText, // Exibe a mensagem de erro
+        errorText: passwordErrorText, 
       ),
     );
 
@@ -110,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
           String password = passwordEditingController.text;
 
           if (_formKey.currentState!.validate()) {
-            // Limpa as mensagens de erro se a validação passar
+            
             setState(() {
               emailErrorText = null;
               passwordErrorText = null;

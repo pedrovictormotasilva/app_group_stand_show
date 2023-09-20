@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? authToken;
   String? userName;
   String? userEmail;
-  int? userRoleId; // Adicione a variável para o papel do usuário
+  int? userRoleId; 
 
   Future<User> getUserInfo(String accessToken) async {
     try {
@@ -138,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 "Bem-vindo de volta!",
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              if (userRoleId != 4) ...[
+              if (userRoleId == 4) ...[
                 const SizedBox(
                   height: 10,
                 ),
@@ -158,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ],
+              Container(),
             ],
           ),
         ),
