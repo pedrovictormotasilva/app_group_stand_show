@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String? authToken;
   String? userName;
   String? userEmail;
-  int? userRoleId; 
+  int? userRoleId;
 
   Future<User> getUserInfo(String accessToken) async {
     try {
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         userName = user.name;
         userEmail = user.email;
-        userRoleId = user.roleId; // Defina userRoleId aqui
+        userRoleId = user.roleId; 
       });
     } catch (error) {
       print('Erro ao buscar informações do usuário: $error');
